@@ -1,5 +1,6 @@
 package com.example.lemonade
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageView
@@ -17,21 +18,29 @@ class MainActivity : AppCompatActivity() {
     private val LEMONADE_STATE = "LEMONADE_STATE"
     private val LEMON_SIZE = "LEMON_SIZE"
     private val SQUEEZE_COUNT = "SQUEEZE_COUNT"
+
     // SELECT represents the "pick lemon" state
     private val SELECT = "select"
+
     // SQUEEZE represents the "squeeze lemon" state
     private val SQUEEZE = "squeeze"
+
     // DRINK represents the "drink lemonade" state
     private val DRINK = "drink"
+
     // RESTART represents the state where the lemonade has been drunk and the glass is empty
     private val RESTART = "restart"
+
     // Default the state to select
     private var lemonadeState = "select"
+
     // Default lemonSize to -1
     private var lemonSize = -1
+
     // Default the squeezeCount to -1
     private var squeezeCount = -1
 
+    //object
     private var lemonTree = LemonTree()
     private var lemonImage: ImageView? = null
 
@@ -52,12 +61,14 @@ class MainActivity : AppCompatActivity() {
         setViewElements()
         lemonImage!!.setOnClickListener {
             // TODO: call the method that handles the state when the image is clicked
-        }
+            clickLemonImage()
+        }// === END setOnClickListener  ===
         lemonImage!!.setOnLongClickListener {
             // TODO: replace 'false' with a call to the function that shows the squeeze count
-            false
-        }
-    }
+            // false
+            showSnackbar()
+        }// === END setOnLongClickListener  ===
+    }// === END onCreate  ===
 
     /**
      * === DO NOT ALTER THIS METHOD ===
@@ -96,11 +107,33 @@ class MainActivity : AppCompatActivity() {
 
         // TODO: lastly, before the function terminates we need to set the view elements so that the
         //  UI can reflect the correct state
-    }
+        when (lemonadeState) {
+            SELECT -> {
+                lemonadeState = SQUEEZE
+                lemonSize = lemonTree.pick()
+                squeezeCount = 0
+            }
+            SQUEEZE -> {
+                squeezeCount = squeezeCount + 1
+                lemonSize = lemonSize - 1
+                lemonadeState = if (lemonSize == 0) DRINK else SQUEEZE
+            }
+            DRINK -> {
+                lemonadeState = RESTART
+                lemonSize = lemonSize - 1
+            }
+            RESTART -> {
+                lemonadeState = SELECT
+            }
+
+        }// === END when ===
+        setViewElements()
+    }// === END clickLemonImage()  ===
 
     /**
      * Set up the view elements according to the state.
      */
+    @SuppressLint("SetTextI18n")
     private fun setViewElements() {
         val textAction: TextView = findViewById(R.id.text_action)
         // TODO: set up a conditional that tracks the lemonadeState
@@ -111,7 +144,25 @@ class MainActivity : AppCompatActivity() {
         // TODO: Additionally, for each state, the lemonImage should be set to the corresponding
         //  drawable from the drawable resources. The drawables have the same names as the strings
         //  but remember that they are drawables, not strings.
-    }
+        when (lemonadeState) {
+            SELECT -> {
+                textAction.text = "Click to select a lemon!"
+                lemonImage?.setImageResource(R.drawable.lemon_tree)
+            }
+            SQUEEZE -> {
+                textAction.text = "Click to juice the lemon!"
+                lemonImage?.setImageResource(R.drawable.lemon_squeeze)
+            }
+            DRINK -> {
+                textAction.text = "Click to drink your lemonade!"
+                lemonImage?.setImageResource(R.drawable.lemon_drink)
+            }
+            RESTART -> {
+                textAction.text = "Click to start again!"
+                lemonImage?.setImageResource(R.drawable.lemon_restart)
+            }
+        }// === END when  ===
+    }// === END setViewElements()  ===
 
     /**
      * === DO NOT ALTER THIS METHOD ===
@@ -129,8 +180,8 @@ class MainActivity : AppCompatActivity() {
             Snackbar.LENGTH_SHORT
         ).show()
         return true
-    }
-}
+    }// === END showSnackbar()  ===
+}// === END MainActivity class  ===
 
 /**
  * A Lemon tree class with a method to "pick" a lemon. The "size" of the lemon is randomized
@@ -139,5 +190,5 @@ class MainActivity : AppCompatActivity() {
 class LemonTree {
     fun pick(): Int {
         return (2..4).random()
-    }
-}
+    }// === END pic()  ===
+}// === END LemonTree class  ===
